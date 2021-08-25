@@ -56,14 +56,14 @@ author    = {Joya Chen and
              Dong Liu and
              Tong Xu and
              Shiwei Wu and
-             Yifei Chen and
+             Yifei Cheng and
              Enhong Chen},
 title     = {Is Heuristic Sampling Necessary in Training Deep Object Detectors?},
-journal   = {CoRR},
-volume    = {abs/1909.04868},
-url       = {http://arxiv.org/abs/1909.04868},
-archivePrefix = {arXiv},
-eprint    = {1909.04868},
+journal   = {IEEE Transactions on Image Processing},
+year      = {2021},
+volume    = {},
+number    = {},
+pages     = {1-1},
 }
 ```
 

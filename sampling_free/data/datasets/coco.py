@@ -1,22 +1,14 @@
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-import torch
-import torchvision
+import torch, torchvision
 
-from sampling_free.structures.bounding_box import BoxList
-from sampling_free.structures.segmentation_mask import SegmentationMask
-from sampling_free.structures.keypoint import PersonKeypoints
-
+from sampling_free.structures import BoxList, SegmentationMask
 
 min_keypoints_per_image = 10
-
 
 def _count_visible_keypoints(anno):
     return sum(sum(1 for v in ann["keypoints"][2::3] if v > 0) for ann in anno)
 
-
 def _has_only_empty_bbox(anno):
     return all(any(o <= 1 for o in obj["bbox"][2:]) for obj in anno)
-
 
 def has_valid_annotation(anno):
     # if it's empty, there is no annotation
@@ -34,7 +26,6 @@ def has_valid_annotation(anno):
     if _count_visible_keypoints(anno) >= min_keypoints_per_image:
         return True
     return False
-
 
 class COCODataset(torchvision.datasets.coco.CocoDetection):
     def __init__(

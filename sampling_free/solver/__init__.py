@@ -1,4 +1,2 @@
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-from .build import make_optimizer
-from .build import make_lr_scheduler
-from .lr_scheduler import WarmupMultiStepLR
+from .optimizer import build_optimizer
+from .lr_scheduler import build_lr_scheduler

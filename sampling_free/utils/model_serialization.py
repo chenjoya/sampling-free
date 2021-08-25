@@ -1,10 +1,9 @@
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 from collections import OrderedDict
 import logging
 
 import torch
 
-from sampling_free.utils.imports import import_file
+from .imports import import_file
 
 
 def align_and_update_state_dicts(model_state_dict, loaded_state_dict):

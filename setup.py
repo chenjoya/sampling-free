@@ -1,16 +1,8 @@
-#!/usr/bin/env python
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-
-import glob
-import os
+import glob, os
+from setuptools import find_packages, setup
 
 import torch
-from setuptools import find_packages
-from setuptools import setup
-from torch.utils.cpp_extension import CUDA_HOME
-from torch.utils.cpp_extension import CppExtension
-from torch.utils.cpp_extension import CUDAExtension
-
+from torch.utils.cpp_extension import CUDA_HOME, CppExtension, CUDAExtension
 
 requirements = [
     "torchvision",
@@ -20,9 +12,9 @@ requirements = [
     "matplotlib",
     "tqdm",
     "opencv-python",
-    "scikit-image"
+    "scikit-image",
+    "pycocotools"
 ]
-
 
 def get_extensions():
     extensions_dir = os.path.join("sampling_free", "csrc")
@@ -68,8 +60,8 @@ setup(
     version="0.1",
     author="Joya Chen",
     url="https://github.com/chenjoya/sampling-free",
-    description="object detector in pytorch",
-    packages=find_packages(exclude=("configs", "tests",)),
+    description="Sampling-Free mechanism for object detection by PyTorch",
+    packages=find_packages(exclude=("configs",)),
     install_requires=requirements,
     ext_modules=get_extensions(),
     cmdclass={"build_ext": torch.utils.cpp_extension.BuildExtension},

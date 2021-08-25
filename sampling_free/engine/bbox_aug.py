@@ -3,10 +3,8 @@ import torchvision.transforms as TT
 
 from sampling_free.config import cfg
 from sampling_free.data import transforms as T
-from sampling_free.structures.image_list import to_image_list
-from sampling_free.structures.bounding_box import BoxList
-from sampling_free.modeling.rpn.fcos.inference import make_fcos_postprocessor
-
+from sampling_free.structures import to_image_list, BoxList
+from sampling_free.modeling.generalized_rcnn.rpn.fcos.inference import make_fcos_postprocessor
 
 def im_detect_bbox_aug(model, images, device):
     # Collect detections computed under different transformations

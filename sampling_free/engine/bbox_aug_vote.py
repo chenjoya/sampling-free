@@ -1,14 +1,12 @@
+import numpy as np
+
 import torch
 import torchvision.transforms as TT
 
 from sampling_free.config import cfg
 from sampling_free.data import transforms as T
-from sampling_free.structures.image_list import to_image_list
-from sampling_free.structures.bounding_box import BoxList
-from sampling_free.structures.boxlist_ops import cat_boxlist
+from sampling_free.structures import to_image_list, BoxList, cat_boxlist
 from sampling_free.layers import nms as _box_nms
-import numpy as np
-
 
 def im_detect_bbox_aug_vote(model, images, device):
     # Collect detections computed under different transformations

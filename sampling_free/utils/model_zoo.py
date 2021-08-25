@@ -1,19 +1,8 @@
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-import os
-import sys
+import os, sys
 
-try:
-    from torch.utils.model_zoo import _download_url_to_file
-    from torch.utils.model_zoo import urlparse
-    from torch.utils.model_zoo import HASH_REGEX
-except:
-    from torch.hub import _download_url_to_file
-    from torch.hub import urlparse
-    from torch.hub import HASH_REGEX
+from torch.hub import _download_url_to_file, urlparse, HASH_REGEX
 
-from sampling_free.utils.comm import is_main_process
-from sampling_free.utils.comm import synchronize
-
+from .comm import is_main_process, synchronize
 
 # very similar to https://github.com/pytorch/pytorch/blob/master/torch/utils/model_zoo.py
 # but with a few improvements and modifications

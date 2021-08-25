@@ -4,7 +4,6 @@ This is useful when doing distributed training.
 """
 
 import pickle
-import time
 
 import torch
 import torch.distributed as dist
@@ -28,7 +27,6 @@ def get_rank():
 
 def is_main_process():
     return get_rank() == 0
-
 
 def synchronize():
     """
@@ -116,6 +114,8 @@ def reduce_dict(input_dict, average=True):
         reduced_dict = {k: v for k, v in zip(names, values)}
     return reduced_dict
 
-
-def is_pytorch_1_1_0_or_later():
-    return [int(_) for _ in torch.__version__.split(".")[:3]] >= [1, 1, 0]
+def reduce_sum(tensor):
+    if get_world_size() > 0:
+        tensor = tensor.clone()
+        dist.all_reduce(tensor)
+    return tensor

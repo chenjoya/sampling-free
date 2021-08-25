@@ -1,24 +1,20 @@
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-import logging
-import time
-import os
+
+import logging, os
+from tqdm import tqdm
 
 import torch
-from tqdm import tqdm
 
 from sampling_free.config import cfg
 from sampling_free.data.datasets.evaluation import evaluate
-from ..utils.comm import is_main_process, get_world_size
-from ..utils.comm import all_gather
-from ..utils.comm import synchronize
-from ..utils.timer import Timer, get_time_str
+from sampling_free.utils import is_main_process, get_world_size, all_gather, synchronize, Timer, get_time_str
 from .bbox_aug import im_detect_bbox_aug
 from .bbox_aug_vote import im_detect_bbox_aug_vote
 
 
-def compute_on_dataset(model, data_loader, device, timer=None):
+def compute_on_dataset(model, data_loader, timer=None):
     model.eval()
     results_dict = {}
+    device = torch.device("cuda")
     cpu_device = torch.device("cpu")
     for _, batch in enumerate(tqdm(data_loader)):
         images, targets, image_ids = batch
@@ -64,49 +60,46 @@ def _accumulate_predictions_from_multiple_gpus(predictions_per_gpu):
     return predictions
 
 
-def inference(
+def do_inference(
         model,
         data_loader,
-        dataset_name,
         iou_types=("bbox",),
         box_only=False,
-        device="cuda",
         expected_results=(),
         expected_results_sigma_tol=4,
         output_folder=None,
 ):
-    # convert to a torch.device for efficiency
-    device = torch.device(device)
-    num_devices = get_world_size()
+    num_gpus = get_world_size()
     logger = logging.getLogger("sampling_free.inference")
     dataset = data_loader.dataset
-    logger.info("Start evaluation on {} dataset({} images).".format(dataset_name, len(dataset)))
+    logger.info("Start evaluation on {} dataset({} images).".format(
+        dataset.__class__.__name__, len(dataset)))
     total_timer = Timer()
     inference_timer = Timer()
     total_timer.tic()
-    predictions = compute_on_dataset(model, data_loader, device, inference_timer)
+    predictions = compute_on_dataset(model, data_loader, inference_timer)
     # wait for all processes to complete before measuring the time
     synchronize()
     total_time = total_timer.toc()
     total_time_str = get_time_str(total_time)
     logger.info(
         "Total run time: {} ({} s / img per device, on {} devices)".format(
-            total_time_str, total_time * num_devices / len(dataset), num_devices
+            total_time_str, total_time * num_gpus / len(dataset), num_gpus
         )
     )
     total_infer_time = get_time_str(inference_timer.total_time)
     logger.info(
         "Model inference time: {} ({} s / img per device, on {} devices)".format(
             total_infer_time,
-            inference_timer.total_time * num_devices / len(dataset),
-            num_devices,
+            inference_timer.total_time * num_gpus / len(dataset),
+            num_gpus,
         )
     )
 
     predictions = _accumulate_predictions_from_multiple_gpus(predictions)
     if not is_main_process():
         return
-
+    
     if output_folder:
         torch.save(predictions, os.path.join(output_folder, "predictions.pth"))
 
@@ -118,6 +111,6 @@ def inference(
     )
 
     return evaluate(dataset=dataset,
-                    predictions=predictions,
-                    output_folder=output_folder,
-                    **extra_args)
+        predictions=predictions,
+        output_folder=output_folder,
+        **extra_args)

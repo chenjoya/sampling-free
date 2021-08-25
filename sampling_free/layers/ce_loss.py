@@ -1,4 +1,3 @@
-import torch
 from torch import nn
 from torch.autograd import Function
 from torch.autograd.function import once_differentiable
@@ -32,12 +31,12 @@ class _CELoss(Function):
 ce_loss_cuda = _CELoss.apply
 
 class CELoss(nn.Module):
-    def __init__(self):
-        super(CELoss, self).__init__()
-
-    def forward(self, logits, targets):
+    def __init__(self, ):
+        super().__init__()
+    
+    def forward(self, logits, targets,sum=True):
         loss = ce_loss_cuda(logits, targets)
-        return loss.sum()
+        return loss.sum() if sum else loss
 
     def __repr__(self):
         tmpstr = self.__class__.__name__

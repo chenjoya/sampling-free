@@ -1,4 +1,3 @@
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import os
 
 from yacs.config import CfgNode as CN
@@ -21,21 +20,20 @@ from yacs.config import CfgNode as CN
 _C = CN()
 
 _C.MODEL = CN()
-_C.MODEL.RPN_ONLY = False
+_C.MODEL.RCNN_ON = False
 _C.MODEL.MASK_ON = False
 _C.MODEL.PAA_ON = False
 _C.MODEL.ATSS_ON = False
 _C.MODEL.FCOS_ON = False
 _C.MODEL.RETINANET_ON = False
-_C.MODEL.KEYPOINT_ON = False
-_C.MODEL.DEVICE = "cuda"
-_C.MODEL.META_ARCHITECTURE = "GeneralizedRCNN"
-_C.MODEL.CLS_AGNOSTIC_BBOX_REG = False
 _C.MODEL.SAMPLING_FREE = False
+_C.MODEL.OVSAMPLER_ON = False
+_C.MODEL.ARCHITECTURE = "GeneralizedRCNN"
 
 # If the WEIGHT starts with a catalog://, like :R-50, the code will look for
 # the path in paths_catalog. Else, it will use it as the specified absolute
 # path
+_C.MODEL.PRETRAINED = ""
 _C.MODEL.WEIGHT = ""
 _C.MODEL.USE_SYNCBN = False
 
@@ -76,7 +74,7 @@ _C.DATASETS.TEST = ()
 # -----------------------------------------------------------------------------
 _C.DATALOADER = CN()
 # Number of data loading threads
-_C.DATALOADER.NUM_WORKERS = 4
+_C.DATALOADER.NUM_WORKERS = 2
 # If > 0, this enforces that each collated batch should have a size divisible
 # by SIZE_DIVISIBILITY
 _C.DATALOADER.SIZE_DIVISIBILITY = 0
@@ -109,19 +107,6 @@ _C.MODEL.BACKBONE.USE_GN = False
 _C.MODEL.FPN = CN()
 _C.MODEL.FPN.USE_GN = False
 _C.MODEL.FPN.USE_RELU = False
-
-
-# ---------------------------------------------------------------------------- #
-# Group Norm options
-# ---------------------------------------------------------------------------- #
-_C.MODEL.GROUP_NORM = CN()
-# Number of dimensions per group in GroupNorm (-1 if using NUM_GROUPS)
-_C.MODEL.GROUP_NORM.DIM_PER_GP = -1
-# Number of groups in GroupNorm (-1 if using DIM_PER_GP)
-_C.MODEL.GROUP_NORM.NUM_GROUPS = 32
-# GroupNorm's small constant in the denominator
-_C.MODEL.GROUP_NORM.EPSILON = 1e-5
-
 
 # ---------------------------------------------------------------------------- #
 # RPN options
@@ -233,7 +218,6 @@ _C.MODEL.ROI_MASK_HEAD.POOLER_SCALES = (1.0 / 16,)
 _C.MODEL.ROI_MASK_HEAD.MLP_HEAD_DIM = 1024
 _C.MODEL.ROI_MASK_HEAD.CONV_LAYERS = (256, 256, 256, 256)
 _C.MODEL.ROI_MASK_HEAD.RESOLUTION = 14
-_C.MODEL.ROI_MASK_HEAD.SHARE_BOX_FEATURE_EXTRACTOR = True
 # Whether or not resize and translate masks to the input image.
 _C.MODEL.ROI_MASK_HEAD.POSTPROCESS_MASKS = False
 _C.MODEL.ROI_MASK_HEAD.POSTPROCESS_MASKS_THRESHOLD = 0.5
@@ -241,18 +225,6 @@ _C.MODEL.ROI_MASK_HEAD.POSTPROCESS_MASKS_THRESHOLD = 0.5
 _C.MODEL.ROI_MASK_HEAD.DILATION = 1
 # GN
 _C.MODEL.ROI_MASK_HEAD.USE_GN = False
-
-_C.MODEL.ROI_KEYPOINT_HEAD = CN()
-_C.MODEL.ROI_KEYPOINT_HEAD.FEATURE_EXTRACTOR = "KeypointRCNNFeatureExtractor"
-_C.MODEL.ROI_KEYPOINT_HEAD.PREDICTOR = "KeypointRCNNPredictor"
-_C.MODEL.ROI_KEYPOINT_HEAD.POOLER_RESOLUTION = 14
-_C.MODEL.ROI_KEYPOINT_HEAD.POOLER_SAMPLING_RATIO = 0
-_C.MODEL.ROI_KEYPOINT_HEAD.POOLER_SCALES = (1.0 / 16,)
-_C.MODEL.ROI_KEYPOINT_HEAD.MLP_HEAD_DIM = 1024
-_C.MODEL.ROI_KEYPOINT_HEAD.CONV_LAYERS = tuple(512 for _ in range(8))
-_C.MODEL.ROI_KEYPOINT_HEAD.RESOLUTION = 14
-_C.MODEL.ROI_KEYPOINT_HEAD.NUM_CLASSES = 17
-_C.MODEL.ROI_KEYPOINT_HEAD.SHARE_BOX_FEATURE_EXTRACTOR = True
 
 # ---------------------------------------------------------------------------- #
 # ResNe[X]t options (ResNets = {ResNet, ResNeXt}
@@ -326,7 +298,6 @@ _C.MODEL.PAA.INFERENCE_TH = 0.05
 _C.MODEL.PAA.NMS_TH = 0.6
 _C.MODEL.PAA.PRE_NMS_TOP_N = 1000
 
-_C.MODEL.PAA.USE_IOU_PRED = True
 _C.MODEL.PAA.IOU_LOSS_WEIGHT = 0.5
 
 _C.MODEL.PAA.INFERENCE_SCORE_VOTING = False
@@ -468,73 +439,24 @@ _C.MODEL.RETINANET.INFERENCE_TH = 0.05
 # NMS threshold used in RetinaNet
 _C.MODEL.RETINANET.NMS_TH = 0.4
 
-
-# ---------------------------------------------------------------------------- #
-# FBNet options
-# ---------------------------------------------------------------------------- #
-_C.MODEL.FBNET = CN()
-_C.MODEL.FBNET.ARCH = "default"
-# custom arch
-_C.MODEL.FBNET.ARCH_DEF = ""
-_C.MODEL.FBNET.BN_TYPE = "bn"
-_C.MODEL.FBNET.SCALE_FACTOR = 1.0
-# the output channels will be divisible by WIDTH_DIVISOR
-_C.MODEL.FBNET.WIDTH_DIVISOR = 1
-_C.MODEL.FBNET.DW_CONV_SKIP_BN = True
-_C.MODEL.FBNET.DW_CONV_SKIP_RELU = True
-
-# > 0 scale, == 0 skip, < 0 same dimension
-_C.MODEL.FBNET.DET_HEAD_LAST_SCALE = 1.0
-_C.MODEL.FBNET.DET_HEAD_BLOCKS = []
-# overwrite the stride for the head, 0 to use original value
-_C.MODEL.FBNET.DET_HEAD_STRIDE = 0
-
-# > 0 scale, == 0 skip, < 0 same dimension
-_C.MODEL.FBNET.KPTS_HEAD_LAST_SCALE = 0.0
-_C.MODEL.FBNET.KPTS_HEAD_BLOCKS = []
-# overwrite the stride for the head, 0 to use original value
-_C.MODEL.FBNET.KPTS_HEAD_STRIDE = 0
-
-# > 0 scale, == 0 skip, < 0 same dimension
-_C.MODEL.FBNET.MASK_HEAD_LAST_SCALE = 0.0
-_C.MODEL.FBNET.MASK_HEAD_BLOCKS = []
-# overwrite the stride for the head, 0 to use original value
-_C.MODEL.FBNET.MASK_HEAD_STRIDE = 0
-
-# 0 to use all blocks defined in arch_def
-_C.MODEL.FBNET.RPN_HEAD_BLOCKS = 0
-_C.MODEL.FBNET.RPN_BN_TYPE = ""
-
 # ---------------------------------------------------------------------------- #
 # Solver
 # ---------------------------------------------------------------------------- #
 _C.SOLVER = CN()
 _C.SOLVER.MAX_ITER = 40000
-
-_C.SOLVER.BASE_LR = 0.001
+_C.SOLVER.LR = 0.001
 _C.SOLVER.BIAS_LR_FACTOR = 2
-# the learning rate factor of deformable convolution offsets
-_C.SOLVER.DCONV_OFFSETS_LR_FACTOR = 1.0
-
 _C.SOLVER.MOMENTUM = 0.9
-
 _C.SOLVER.WEIGHT_DECAY = 0.0005
 _C.SOLVER.WEIGHT_DECAY_BIAS = 0
-
 _C.SOLVER.GAMMA = 0.1
 _C.SOLVER.STEPS = (30000,)
-
 _C.SOLVER.WARMUP_FACTOR = 1.0 / 3
 _C.SOLVER.WARMUP_ITERS = 500
 _C.SOLVER.WARMUP_METHOD = "linear"
-
-_C.SOLVER.CHECKPOINT_PERIOD = 2500
-
-# Number of images per batch
-# This is global, so if we have 8 GPUs and IMS_PER_BATCH = 16, each GPU will
-# see 2 images per batch
-_C.SOLVER.IMS_PER_BATCH = 16
-
+_C.SOLVER.CHECKPOINT_PERIOD = 10000
+_C.SOLVER.TEST_PERIOD = 10000
+_C.SOLVER.BATCH_SIZE = 16
 
 # ---------------------------------------------------------------------------- #
 # Specific test options
@@ -545,10 +467,9 @@ _C.TEST.EXPECTED_RESULTS_SIGMA_TOL = 4
 # Number of images per batch
 # This is global, so if we have 8 GPUs and IMS_PER_BATCH = 16, each GPU will
 # see 2 images per batch
-_C.TEST.IMS_PER_BATCH = 64
+_C.TEST.BATCH_SIZE = 64
 # Number of detections per image
 _C.TEST.DETECTIONS_PER_IMG = 100
-
 
 # ---------------------------------------------------------------------------- #
 # Test-time augmentations for bounding box detection
@@ -575,11 +496,5 @@ _C.TEST.BBOX_AUG.VOTE = False
 _C.TEST.BBOX_AUG.VOTE_TH = 0.66
 _C.TEST.BBOX_AUG.SCALE_RANGES = ()
 _C.TEST.BBOX_AUG.MERGE_TYPE = 'vote'
-
-
-# ---------------------------------------------------------------------------- #
-# Misc options
-# ---------------------------------------------------------------------------- #
-_C.OUTPUT_DIR = "."
 
 _C.PATHS_CATALOG = os.path.join(os.path.dirname(__file__), "paths_catalog.py")

@@ -1,9 +1,7 @@
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import itertools
 
 import torch
-from torch.utils.data.sampler import BatchSampler
-from torch.utils.data.sampler import Sampler
+from torch.utils.data.sampler import BatchSampler, Sampler
 
 
 class GroupedBatchSampler(BatchSampler):
@@ -12,13 +10,11 @@ class GroupedBatchSampler(BatchSampler):
     It enforces that elements from the same group should appear in groups of batch_size.
     It also tries to provide mini-batches which follows an ordering which is
     as close as possible to the ordering from the original sampler.
-
     Arguments:
         sampler (Sampler): Base sampler.
         batch_size (int): Size of mini-batch.
         drop_uneven (bool): If ``True``, the sampler will drop the batches whose
             size is less than ``batch_size``
-
     """
 
     def __init__(self, sampler, group_ids, batch_size, drop_uneven=False):

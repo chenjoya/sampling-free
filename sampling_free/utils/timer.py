@@ -1,8 +1,4 @@
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-
-
-import time
-import datetime
+import time, datetime
 
 
 class Timer(object):

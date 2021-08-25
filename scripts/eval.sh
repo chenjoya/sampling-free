@@ -1,9 +1,11 @@
-model=fcos/fcos_R_50_FPN_1x
+model=sampling_free/fcos_R_50_FPN_1x
 
-CUDA_VISIBLE_DEVICES=5,7 python -m torch.distributed.launch \
-    --nproc_per_node=2 \
-    --master_port=$((RANDOM + 10000)) \
-    tools/test_net.py \
-    --config-file configs/$model\.yaml \
-    DATALOADER.NUM_WORKERS 8 \
-    OUTPUT_DIR outputs/$model
+gpus=2,5
+gpun=2
+
+for iter in "0040000"
+do
+    weight=outputs/$model/model_$iter\.pth
+    CUDA_VISIBLE_DEVICES=$gpus python -m torch.distributed.run --standalone --nnodes=1 --nproc_per_node=$gpun \
+    tools/test.py --config-file outputs/$model/config\.yaml MODEL.WEIGHT $weight
+done 

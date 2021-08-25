@@ -50,3 +50,13 @@ class WarmupMultiStepLR(torch.optim.lr_scheduler._LRScheduler):
             * self.gamma ** bisect_right(self.milestones, self.last_epoch)
             for base_lr in self.base_lrs
         ]
+
+def build_lr_scheduler(cfg, optimizer):
+    return WarmupMultiStepLR(
+        optimizer,
+        cfg.SOLVER.STEPS,
+        cfg.SOLVER.GAMMA,
+        warmup_factor=cfg.SOLVER.WARMUP_FACTOR,
+        warmup_iters=cfg.SOLVER.WARMUP_ITERS,
+        warmup_method=cfg.SOLVER.WARMUP_METHOD,
+    )

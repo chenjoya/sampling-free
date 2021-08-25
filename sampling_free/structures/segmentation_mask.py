@@ -1,8 +1,6 @@
-import cv2
-import copy
+import cv2, copy
+
 import torch
-import numpy as np
-from sampling_free.layers.misc import interpolate
 
 import pycocotools.mask as mask_utils
 

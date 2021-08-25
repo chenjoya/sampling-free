@@ -1,6 +1,7 @@
 MODEL:
-  META_ARCHITECTURE: "GeneralizedRCNN"
-  WEIGHT: "catalog://ImageNetPretrained/MSRA/R-50"
+  ARCHITECTURE: "GeneralizedRCNN"
+  PRETRAINED: "catalog://ImageNetPretrained/MSRA/R-50"
+  RCNN_ON: True
   SAMPLING_FREE: True
   BACKBONE:
     CONV_BODY: "R-50-FPN"
@@ -13,10 +14,10 @@ MODEL:
     PRE_NMS_TOP_N_TEST: 1000
     POST_NMS_TOP_N_TEST: 1000
     FPN_POST_NMS_TOP_N_TEST: 1000
-    PRIOR_PROB: 1e-4 # optimal bias initialization
+    PRIOR_PROB: 1e-4 
   ROI_HEADS:
     USE_FPN: True
-    SCORE_THRESH: 1e-3 # imbalance would decrease the overall confidence scores
+    SCORE_THRESH: 1e-3 
   ROI_BOX_HEAD:
     POOLER_RESOLUTION: 7
     POOLER_SCALES: (0.25, 0.125, 0.0625, 0.03125)
@@ -30,15 +31,15 @@ MODEL:
     POOLER_RESOLUTION: 14
     POOLER_SAMPLING_RATIO: 2
     RESOLUTION: 28
-    SHARE_BOX_FEATURE_EXTRACTOR: False
   MASK_ON: True
 DATASETS:
-  TRAIN: ("coco_2014_train", "coco_2014_valminusminival")
-  TEST: ("coco_2014_minival",)
+  TRAIN: ("coco_2017_train", )
+  TEST: ("coco_2017_val",)
 DATALOADER:
   SIZE_DIVISIBILITY: 32
 SOLVER:
-  BASE_LR: 0.02
+  BATCH_SIZE: 16
+  LR: 0.02
   WEIGHT_DECAY: 0.0001
   STEPS: (60000, 80000)
   MAX_ITER: 90000

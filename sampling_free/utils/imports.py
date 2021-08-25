@@ -1,10 +1,4 @@
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-import torch
-
-import importlib
-import importlib.util
-import sys
-
+import importlib, sys, importlib.util
 
 # from https://stackoverflow.com/questions/67631/how-to-import-a-module-given-the-full-path?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
 def import_file(module_name, file_path, make_importable=False):

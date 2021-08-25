@@ -15,10 +15,7 @@ conda create --name sampling-free python=3.8
 conda activate sampling-free
 
 # sampling-free and cocoapi dependencies
-pip install ninja yacs cython matplotlib tqdm opencv-python pillow
-
-# install cocoapi
-pip install pycocotools
+pip install ninja yacs cython matplotlib tqdm opencv-python pillow pycocotools
 
 # follow PyTorch installation in https://pytorch.org/get-started/locally/
 conda install pytorch torchvision cudatoolkit=11.1

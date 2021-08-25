@@ -1,14 +1,11 @@
-import logging
-import tempfile
-import os
-import torch
+import logging, tempfile, os
 from collections import OrderedDict
 from tqdm import tqdm
 
-from sampling_free.modeling.roi_heads.mask_head.inference import Masker
-from sampling_free.structures.bounding_box import BoxList
-from sampling_free.structures.boxlist_ops import boxlist_iou
+import torch
 
+from sampling_free.modeling.generalized_rcnn.roi_heads.mask_head.inference import Masker
+from sampling_free.structures import BoxList, boxlist_iou
 
 def do_coco_evaluation(
     dataset,
@@ -19,7 +16,7 @@ def do_coco_evaluation(
     expected_results,
     expected_results_sigma_tol,
 ):
-    logger = logging.getLogger("paa_core.inference")
+    logger = logging.getLogger("sampling-free.inference")
 
     if box_only:
         logger.info("Evaluating bbox proposals")
@@ -404,7 +401,7 @@ def check_expected_results(results, expected_results, sigma_tol):
     if not expected_results:
         return
 
-    logger = logging.getLogger("paa_core.inference")
+    logger = logging.getLogger("sampling-free.inference")
     for task, metric, (mean, std) in expected_results:
         actual_val = results.results[task][metric]
         lo = mean - sigma_tol * std

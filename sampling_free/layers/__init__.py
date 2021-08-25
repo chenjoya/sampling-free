@@ -1,12 +1,5 @@
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-import torch
-
 from .batch_norm import FrozenBatchNorm2d
-from .misc import Conv2d
-from .misc import DFConv2d
-from .misc import ConvTranspose2d
-from .misc import BatchNorm2d
-from .misc import interpolate
+from .misc import Conv2d, DFConv2d, ConvTranspose2d, BatchNorm2d, interpolate
 from .nms import nms, ml_nms
 from .roi_align import ROIAlign
 from .roi_align import roi_align
@@ -17,13 +10,6 @@ from .sigmoid_focal_loss import SigmoidFocalLoss
 from .ce_loss import CELoss
 from .iou_loss import IOULoss
 from .scale import Scale
-from .dcn.deform_conv_func import deform_conv, modulated_deform_conv
-from .dcn.deform_conv_module import DeformConv, ModulatedDeformConv, \
-    ModulatedDeformConvPack
-from .dcn.deform_pool_func import deform_roi_pooling
-from .dcn.deform_pool_module import DeformRoIPooling, DeformRoIPoolingPack, \
-    ModulatedDeformRoIPoolingPack
-
 
 __all__ = [
     "nms",
@@ -40,15 +26,7 @@ __all__ = [
     "BatchNorm2d",
     "FrozenBatchNorm2d",
     "SigmoidFocalLoss",
-    'deform_conv',
-    'modulated_deform_conv',
-    'DeformConv',
-    'ModulatedDeformConv',
-    'ModulatedDeformConvPack',
-    'deform_roi_pooling',
-    'DeformRoIPooling',
-    'DeformRoIPoolingPack',
-    'ModulatedDeformRoIPoolingPack',
     "IOULoss",
-    "Scale"
+    "Scale",
+    "CELoss"
 ]

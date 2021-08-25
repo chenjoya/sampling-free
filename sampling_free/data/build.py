@@ -1,18 +1,15 @@
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-import bisect
-import copy
-import logging
+import bisect, copy
 
-import torch.utils.data
-from sampling_free.utils.comm import get_world_size
-from sampling_free.utils.imports import import_file
+from torchvision.datasets.samplers import DistributedSampler
+from torch.utils.data import DataLoader
+from torch.utils.data.sampler import RandomSampler, SequentialSampler, BatchSampler
 
-from . import datasets as D
-from . import samplers
+from sampling_free.utils import get_world_size, import_file
 
+from .samplers import GroupedBatchSampler, IterationBasedBatchSampler
+from .datasets import ConcatDataset
 from .collate_batch import BatchCollator, BBoxAugCollator
 from .transforms import build_transforms
-
 
 def build_dataset(dataset_list, transforms, dataset_catalog, is_train=True):
     """
@@ -31,6 +28,7 @@ def build_dataset(dataset_list, transforms, dataset_catalog, is_train=True):
     datasets = []
     for dataset_name in dataset_list:
         data = dataset_catalog.get(dataset_name)
+        from . import datasets as D
         factory = getattr(D, data["factory"])
         args = data["args"]
         # for COCODataset, we want to remove images without annotations
@@ -51,18 +49,18 @@ def build_dataset(dataset_list, transforms, dataset_catalog, is_train=True):
     # for training, concatenate all datasets into a single one
     dataset = datasets[0]
     if len(datasets) > 1:
-        dataset = D.ConcatDataset(datasets)
+        dataset = ConcatDataset(datasets)
 
     return [dataset]
 
 
 def make_data_sampler(dataset, shuffle, distributed):
     if distributed:
-        return samplers.DistributedSampler(dataset, shuffle=shuffle)
+        DistributedSampler(dataset, shuffle=shuffle)
     if shuffle:
-        sampler = torch.utils.data.sampler.RandomSampler(dataset)
+        sampler = RandomSampler(dataset)
     else:
-        sampler = torch.utils.data.sampler.SequentialSampler(dataset)
+        sampler = SequentialSampler(dataset)
     return sampler
 
 
@@ -81,7 +79,6 @@ def _compute_aspect_ratios(dataset):
         aspect_ratios.append(aspect_ratio)
     return aspect_ratios
 
-
 def make_batch_data_sampler(
     dataset, sampler, aspect_grouping, images_per_batch, num_iters=None, start_iter=0
 ):
@@ -90,54 +87,40 @@ def make_batch_data_sampler(
             aspect_grouping = [aspect_grouping]
         aspect_ratios = _compute_aspect_ratios(dataset)
         group_ids = _quantize(aspect_ratios, aspect_grouping)
-        batch_sampler = samplers.GroupedBatchSampler(
+        batch_sampler = GroupedBatchSampler(
             sampler, group_ids, images_per_batch, drop_uneven=False
         )
     else:
-        batch_sampler = torch.utils.data.sampler.BatchSampler(
+        batch_sampler = BatchSampler(
             sampler, images_per_batch, drop_last=False
         )
     if num_iters is not None:
-        batch_sampler = samplers.IterationBasedBatchSampler(
+        batch_sampler = IterationBasedBatchSampler(
             batch_sampler, num_iters, start_iter
         )
     return batch_sampler
 
-
-def make_data_loader(cfg, is_train=True, is_distributed=False, start_iter=0):
+def make_data_loader(cfg, is_train=True, is_distributed=False, start_iter=0, is_for_period=False):
     num_gpus = get_world_size()
     if is_train:
-        images_per_batch = cfg.SOLVER.IMS_PER_BATCH
+        images_per_batch = cfg.SOLVER.BATCH_SIZE
         assert (
             images_per_batch % num_gpus == 0
-        ), "SOLVER.IMS_PER_BATCH ({}) must be divisible by the number "
-        "of GPUs ({}) used.".format(images_per_batch, num_gpus)
+        ), "SOLVER.BATCH_SIZE ({}) must be divisible by the number of GPUs ({}) used.".format(
+            images_per_batch, num_gpus)
         images_per_gpu = images_per_batch // num_gpus
         shuffle = True
         num_iters = cfg.SOLVER.MAX_ITER
     else:
-        images_per_batch = cfg.TEST.IMS_PER_BATCH
+        images_per_batch = cfg.TEST.BATCH_SIZE
         assert (
             images_per_batch % num_gpus == 0
-        ), "TEST.IMS_PER_BATCH ({}) must be divisible by the number "
-        "of GPUs ({}) used.".format(images_per_batch, num_gpus)
+        ), "TEST.BATCH_SIZE ({}) must be divisible by the number of GPUs ({}) used.".format(
+            images_per_batch, num_gpus)
         images_per_gpu = images_per_batch // num_gpus
         shuffle = False if not is_distributed else True
         num_iters = None
         start_iter = 0
-
-    if images_per_gpu > 1:
-        logger = logging.getLogger(__name__)
-        logger.warning(
-            "When using more than one image per GPU you may encounter "
-            "an out-of-memory (OOM) error if your GPU does not have "
-            "sufficient memory. If this happens, you can reduce "
-            "SOLVER.IMS_PER_BATCH (for training) or "
-            "TEST.IMS_PER_BATCH (for inference). For training, you must "
-            "also adjust the learning rate and schedule length according "
-            "to the linear scaling rule. See for example: "
-            "https://github.com/facebookresearch/Detectron/blob/master/configs/getting_started/tutorial_1gpu_e2e_faster_rcnn_R-50-FPN.yaml#L14"
-        )
 
     # group images which have similar aspect ratio. In this case, we only
     # group in two cases: those with width / height > 1, and the other way around,
@@ -145,14 +128,14 @@ def make_data_loader(cfg, is_train=True, is_distributed=False, start_iter=0):
     aspect_grouping = [1] if cfg.DATALOADER.ASPECT_RATIO_GROUPING else []
 
     paths_catalog = import_file(
-        "sampling_free.config.paths_catalog", cfg.PATHS_CATALOG, True
+        "maskrcnn_benchmark.config.paths_catalog", cfg.PATHS_CATALOG, True
     )
     DatasetCatalog = paths_catalog.DatasetCatalog
     dataset_list = cfg.DATASETS.TRAIN if is_train else cfg.DATASETS.TEST
 
     # If bbox aug is enabled in testing, simply set transforms to None and we will apply transforms later
     transforms = None if not is_train and cfg.TEST.BBOX_AUG.ENABLED else build_transforms(cfg, is_train)
-    datasets = build_dataset(dataset_list, transforms, DatasetCatalog, is_train)
+    datasets = build_dataset(dataset_list, transforms, DatasetCatalog, is_train or is_for_period)
 
     data_loaders = []
     for dataset in datasets:
@@ -163,14 +146,14 @@ def make_data_loader(cfg, is_train=True, is_distributed=False, start_iter=0):
         collator = BBoxAugCollator() if not is_train and cfg.TEST.BBOX_AUG.ENABLED else \
             BatchCollator(cfg.DATALOADER.SIZE_DIVISIBILITY)
         num_workers = cfg.DATALOADER.NUM_WORKERS
-        data_loader = torch.utils.data.DataLoader(
+        data_loader = DataLoader(
             dataset,
             num_workers=num_workers,
             batch_sampler=batch_sampler,
             collate_fn=collator,
         )
         data_loaders.append(data_loader)
-    if is_train:
+    if is_train or is_for_period:
         # during training, a single (possibly concatenated) data_loader is returned
         assert len(data_loaders) == 1
         return data_loaders[0]

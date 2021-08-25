@@ -1,13 +1,11 @@
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import logging
 import pickle
 from collections import OrderedDict
 
 import torch
 
-from sampling_free.utils.model_serialization import load_state_dict
-from sampling_free.utils.registry import Registry
-
+from .model_serialization import load_state_dict
+from .registry import Registry
 
 def _rename_basic_resnet_weights(layer_keys):
     layer_keys = [k.replace("_", ".") for k in layer_keys]

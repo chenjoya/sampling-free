@@ -1,7 +1,7 @@
 Metadata-Version: 1.0
 Name: sampling-free
 Version: 0.1
-Summary: object detector in pytorch
+Summary: Sampling-Free mechanism for object detection by PyTorch
 Home-page: https://github.com/chenjoya/sampling-free
 Author: Joya Chen
 Author-email: UNKNOWN
