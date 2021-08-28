@@ -205,19 +205,9 @@ class ATSSModule(torch.nn.Module):
         anchors = self.anchor_generator(images, features)
  
         if self.training:
-            return self._forward_train(box_cls, box_regression, centerness, targets, anchors)
+            return None, self.loss_evaluator(box_cls, box_regression, centerness, targets, anchors)
         else:
-            return self._forward_test(box_cls, box_regression, centerness, anchors)
-
-    def _forward_train(self, box_cls, box_regression, centerness, targets, anchors):
-        return None, self.loss_evaluator(
-            box_cls, box_regression, centerness, targets, anchors
-        )
-    
-    def _forward_test(self, box_cls, box_regression, centerness, anchors):
-        boxes = self.box_selector_test(box_cls, box_regression, centerness, anchors)
-        return boxes, {}
-
+            return self.box_selector_test(box_cls, box_regression, centerness, anchors)
 
 def build_atss(cfg, in_channels):
     return ATSSModule(cfg, in_channels)

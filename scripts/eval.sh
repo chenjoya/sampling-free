@@ -1,6 +1,6 @@
-model=sampling_free/fcos_R_50_FPN_1x
+model=sampling_free/atss_R_50_FPN_1x
 
-gpus=2,5
+gpus=4,5
 gpun=2
 
 for iter in "0040000"
