@@ -1,4 +1,4 @@
-config_file="configs/sampling_free/atss_R_50_FPN_1x.yaml"
+config_file="configs/sampling_free/paa_R_50_FPN_1x.yaml"
 gpus=4,5
 gpun=2
 

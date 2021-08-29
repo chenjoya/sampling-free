@@ -1,5 +1,6 @@
 import torch
 
+
 class GuidedLoss(torch.nn.Module):
     def __init__(self, num_losses, warmup_iters=100):
         super().__init__()
@@ -13,9 +14,10 @@ class GuidedLoss(torch.nn.Module):
         if self.iters < self.warmup_iters:
             with torch.no_grad():
                 self.ratio = sum(losses[1:]) / (self.num_losses - 1) / losses[0]
-            losses[0] = self.ratio * losses[0]
             self.iters += 1
         
+        losses[0] = self.ratio * losses[0]
+
         weighted_losses = {
             name: loss/(2*sigma**2) for loss, sigma, name in zip(losses, self.sigmas, names)
         }
