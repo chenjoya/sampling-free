@@ -343,5 +343,4 @@ class PAALossComputation(nn.Module):
             return {"cls_loss": res[0], "reg_loss": res[1], "iou_pred_loss": res[2]}
 
 def make_paa_loss_evaluator(cfg, box_coder):
-    loss_evaluator = PAALossComputation(cfg, box_coder)
-    return loss_evaluator
+    return PAALossComputation(cfg, box_coder)

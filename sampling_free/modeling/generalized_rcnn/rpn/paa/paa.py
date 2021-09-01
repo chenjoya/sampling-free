@@ -1,28 +1,25 @@
 import math
+
 import torch
-import torch.nn.functional as F
 from torch import nn
 
-from .inference import make_paa_postprocessor
-from .loss import make_paa_loss_evaluator
+from sampling_free.layers import Scale, DFConv2d
 
-from sampling_free.layers import Scale
-from sampling_free.layers import DFConv2d
 from ..anchor_generator import make_anchor_generator_paa
 from ..atss.atss import BoxCoder
-
+from .inference import make_paa_postprocessor
+from .loss import make_paa_loss_evaluator
 
 class PAAHead(torch.nn.Module):
     def __init__(self, cfg, in_channels):
         super(PAAHead, self).__init__()
-        self.cfg = cfg
         num_classes = cfg.MODEL.PAA.NUM_CLASSES - 1
         num_anchors = len(cfg.MODEL.PAA.ASPECT_RATIOS) * cfg.MODEL.PAA.SCALES_PER_OCTAVE
         
         cls_tower = []
         bbox_tower = []
         for i in range(cfg.MODEL.PAA.NUM_CONVS):
-            if self.cfg.MODEL.PAA.USE_DCN_IN_TOWER and \
+            if cfg.MODEL.PAA.USE_DCN_IN_TOWER and \
                     i == cfg.MODEL.PAA.NUM_CONVS - 1:
                 conv_func = DFConv2d
             else:
@@ -98,7 +95,6 @@ class PAAHead(torch.nn.Module):
 class PAAModule(torch.nn.Module):
     def __init__(self, cfg, in_channels):
         super(PAAModule, self).__init__()
-        self.cfg = cfg
         self.head = PAAHead(cfg, in_channels)
         box_coder = BoxCoder(cfg)
         self.loss_evaluator = make_paa_loss_evaluator(cfg, box_coder)
@@ -113,19 +109,11 @@ class PAAModule(torch.nn.Module):
         locations = self.compute_locations(features)
 
         if self.training:
-            return self._forward_train(box_cls, box_regression, iou_pred,
-                                       targets, anchors, locations)
+            return None, self.loss_evaluator(
+                box_cls, box_regression, iou_pred, targets, anchors, locations
+            )
         else:
-            return self._forward_test(box_cls, box_regression, iou_pred, anchors)
-
-    def _forward_train(self, box_cls, box_regression, iou_pred, targets, anchors, locations):
-        return None, self.loss_evaluator(
-            box_cls, box_regression, iou_pred, targets, anchors, locations
-        )
-    
-    def _forward_test(self, box_cls, box_regression, iou_pred, anchors):
-        boxes = self.box_selector_test(box_cls, box_regression, iou_pred, anchors)
-        return boxes, {}
+            return self.box_selector_test(box_cls, box_regression, iou_pred, anchors)
 
     def compute_locations(self, features):
         locations = []
@@ -152,7 +140,6 @@ class PAAModule(torch.nn.Module):
         shift_y = shift_y.reshape(-1)
         locations = torch.stack((shift_x, shift_y), dim=1) + stride // 2
         return locations
-
 
 def build_paa(cfg, in_channels):
     return PAAModule(cfg, in_channels)

@@ -115,7 +115,16 @@ def reduce_dict(input_dict, average=True):
     return reduced_dict
 
 def reduce_sum(tensor):
-    if get_world_size() > 0:
+    if get_world_size() > 1:
         tensor = tensor.clone()
         dist.all_reduce(tensor)
     return tensor
+
+def reduce_avg(tensor):
+    num_gpus = get_world_size()
+    if num_gpus > 1:
+        tensor = tensor.clone()
+        dist.all_reduce(tensor)
+        tensor /= num_gpus
+    return tensor
+

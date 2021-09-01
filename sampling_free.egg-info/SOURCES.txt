@@ -36,7 +36,6 @@ sampling_free/data/datasets/evaluation/coco/coco_eval.py
 sampling_free/data/datasets/evaluation/voc/__init__.py
 sampling_free/data/datasets/evaluation/voc/voc_eval.py
 sampling_free/data/samplers/__init__.py
-sampling_free/data/samplers/distributed.py
 sampling_free/data/samplers/grouped_batch_sampler.py
 sampling_free/data/samplers/iteration_based_batch_sampler.py
 sampling_free/data/transforms/__init__.py
@@ -69,8 +68,10 @@ sampling_free/modeling/generalized_rcnn/backbone/resnet.py
 sampling_free/modeling/generalized_rcnn/functions/__init__.py
 sampling_free/modeling/generalized_rcnn/functions/balanced_positive_negative_sampler.py
 sampling_free/modeling/generalized_rcnn/functions/box_coder.py
+sampling_free/modeling/generalized_rcnn/functions/guided_loss.py
 sampling_free/modeling/generalized_rcnn/functions/make_layers.py
 sampling_free/modeling/generalized_rcnn/functions/matcher.py
+sampling_free/modeling/generalized_rcnn/functions/ovsampler.py
 sampling_free/modeling/generalized_rcnn/functions/poolers.py
 sampling_free/modeling/generalized_rcnn/functions/registry.py
 sampling_free/modeling/generalized_rcnn/roi_heads/__init__.py

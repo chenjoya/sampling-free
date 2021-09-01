@@ -10,11 +10,11 @@ MODEL:
   RETINANET:
     USE_C5: False
   PAA:
-    ANCHOR_SIZES: (64, 128, 256, 512, 1024) # 8S
+    ANCHOR_SIZES: (64, 128, 256, 512, 1024)
     ASPECT_RATIOS: (1.0,)
     SCALES_PER_OCTAVE: 1
     USE_DCN_IN_TOWER: False
-    TOPK: 9 # topk for selecting candidate positive samples from each level
+    TOPK: 9
     IOU_THRESHOLD: 0.1
     REG_LOSS_WEIGHT: 1.3
     IOU_LOSS_WEIGHT: 0.5
