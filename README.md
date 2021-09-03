@@ -42,9 +42,9 @@ PAA | paa_R_50_FPN_1x | 40.4 | -- |
 Model | Config | mAP (07test) |
 --- |:---:|:---:|
 RetinaNet | retinanet_voc_R_50_FPN_0.2x | 79.3 |
-**RetinaNet + Sampling-Free** | retinanet_voc_R_50_FPN_0.2x | **80.1** |
+**RetinaNet - Focal Loss + Sampling-Free** | retinanet_voc_R_50_FPN_0.2x | **80.1** |
 Faster R-CNN | faster_rcnn_voc_R_50_FPN_0.2x | 80.9 |
-**Faster R-CNN + Sampling-Free** | faster_rcnn_voc_R_50_FPN_0.2x | **81.5** |
+**Faster R-CNN - Biased Sampling + Sampling-Free** | faster_rcnn_voc_R_50_FPN_0.2x | **81.5** |
 
 ## Other Details
 See the original benchmark [maskrcnn-benchmark](https://github.com/facebookresearch/maskrcnn-benchmark) for more details.
