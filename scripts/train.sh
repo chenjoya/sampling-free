@@ -1,5 +1,5 @@
-config_file="configs/sampling_free/retinanet_R_50_FPN_1x.yaml"
-gpus=0,2
+config_file="configs/sampling_free/paa_R_50_FPN_1x.yaml"
+gpus=0,4
 gpun=2
 
 # ------------------------ need not change -----------------------------------

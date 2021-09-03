@@ -27,13 +27,15 @@ See [scripts/eval.sh](https://github.com/ChenJoya/sampling-free/blob/master/scri
 Model | Config | Box AP (minival) | Mask AP (minival) |
 --- |:---:|:---:|:---:|
 RetinaNet | retinanet_R_50_FPN_1x | 36.4 | -- |
-**RetinaNet + Sampling-Free** | retinanet_R_50_FPN_1x | **36.8** | -- |
+**RetinaNet - Focal Loss + Sampling-Free** | retinanet_R_50_FPN_1x | **36.8** | -- |
 FCOS | fcos_R_50_FPN_1x | 37.1 | -- |
-**FCOS + Sampling-Free** | fcos_R_50_FPN_1x | **37.6** | -- |
+**FCOS - Focal Loss + Sampling-Free** | fcos_R_50_FPN_1x | **37.6** | -- |
 Faster R-CNN | faster_rcnn_R_50_FPN_1x | 36.8 | -- |
-**Faster R-CNN + Sampling-Free** | faster_rcnn_R_50_FPN_1x | **38.4** | -- |
+**Faster R-CNN -Biased Sampling + Sampling-Free** | faster_rcnn_R_50_FPN_1x | **38.4** | -- |
 Mask R-CNN | mask_rcnn_R_50_FPN_1x | 37.8 | 34.2 |
-**Mask R-CNN + Sampling-Free** | mask_rcnn_R_50_FPN_1x | **39.0** | **34.9** |
+**Mask R-CNN - Biased Sampling + Sampling-Free** | mask_rcnn_R_50_FPN_1x | **39.0** | **34.9** |
+PAA | paa_R_50_FPN_1x | 40.4 | -- |
+**PAA - Focal Loss + Sampling-Free** | paa_R_50_FPN_1x | **41.0** | -- |
 
 ### PASCAL VOC dataset (07+12 for training)
 
